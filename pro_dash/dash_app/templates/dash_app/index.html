@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+  
+  <style>
+
+    path { 
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+    #plot3 { font: 12px Arial;}
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .bar {
+      fill: orange;
+    }
+
+    .bar:hover {
+      fill: orangered ;
+    }
+
+    .x.axis path {
+      display: none;
+    }
+
+    .d3-tip {
+      line-height: 1;
+      font-weight: bold;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 2px;
+    }
+
+   
+    .d3-tip:after {
+      box-sizing: border-box;
+      display: inline;
+      font-size: 10px;
+      width: 100%;
+      line-height: 1;
+      color: rgba(0, 0, 0, 0.8);
+      content: "\25BC";
+      position: absolute;
+      text-align: center;
+    }
+
+    .d3-tip.n:after {
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+    }
+
+    
+    #tooltip {
+    position: absolute;
+    width: 90px;
+    height: auto;
+    padding: 10px;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+#tooltip.hidden {
+    display: none;
+}
+#tooltip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+}
+.indent {
+    padding-left: 5px;
+}
+rect {
+    -moz-transition: all 0.8s;
+    -webkit-transition: all 0.8s;
+    -o-transition: all 0.8s;
+    transition: all 0.8s;
+}
+rect:hover {
+    fill: #D2B48C;
+}
+.axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+.axis text {
+    font-family: sans-serif;
+    font-size: 20px;
+}
+.legend {
+  padding: 2px;
+  border: 2px solid black;
+}
+
+
+/*//link*/
+a:link, a:visited {
+    background-color: #F08080;
+    color: white;
+    padding: 14px 25px;
+    margin: 0 100px 10px 900px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 26px;
+    display: inline-block;
+}
+
+
+a:hover, a:active {
+    background-color:black ;
+}
+
+
+.button {
+    background-color:MediumSeaGreen;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    margin: 80px 0 0 1300px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+  
+  </style>
+
+
+
+
+</head>
+<body style="background: Azure">
+
+
+<div  style="background: DarkSlateGray ">
+ <div class= "row">
+ <div class="col-sm-4">
+  <h1 style="color:white; padding-left:200px" > KPIs Dashboard</h1>
+ </div>
+  <div class="col-sm-4">
+  <a href="dep.html" target="_blank">Next </a>
+</div>
+</div>
+</div>
+
+<div><div id="searchVolume"></div>
+<div id="tooltip" class="hidden">
+    <p class="heading"><span id="Role">word</span></p>
+    <p class="heading">Search Volume</p>
+    <p class="indent"><span id="volVal">5</span></p>
+</div>
+<button class = "button" id="change">Actual project Score</button></div>
+<div class= "container-fluid" id="chartcontainer" >
+
+
+  <div class="row">
+  <div id = "plot3" class="col-sm-6 panel panel-default" style="margin:100px 20px 60px 90px">
+       <div  style="background-color:Teal ; color:white ; font-size: 200%" class="panel-heading">Role v/s Total Score & Actual Score</div>
+  </div>
+
+  <div id = "plot4" class="col-sm-4 panel panel-default" style="margin:100px 60px 60px 20px">
+       <div  style="background-color:Teal ; color:white ; font-size: 170%" class="panel-heading">Actual Score</div>
+  </div>
+  </div>
+</div>
+
+
+
+</body>
+
+  <script>
+  
+      
+
+
+//
+
+var margin = {top: 40, right: 75, bottom: 210, left: 150},
+        w = 1600 - margin.left - margin.right,
+        h = 900 - margin.top - margin.bottom;
+var padding = 10;
+
+var colors =  [["Project_Scores", "   #F4A460"],
+         ["Actuals_project_scores", " #2E8B57"]];
+
+var dataset = [
+ {
+   "Role": "System Analyst",
+   "Project_Scores": 1450,
+   "Actuals_project_scores": 1000
+ },
+ {
+   "Role": "Digital Marketing Engineer",
+   "Project_Scores": 450,
+   "Actuals_project_scores": 400
+ },
+ {
+   "Role": "Digital Marketing Specialist",
+   "Project_Scores": 650,
+   "Actuals_project_scores": 450
+ },
+ {
+   "Role": "EPM Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 1400
+ },
+ {
+   "Role": "Inside sales Associate ",
+   "Project_Scores": 0,
+   "Actuals_project_scores": 0
+ },
+ {
+   "Role": "Graphic designer/Visualizer",
+   "Project_Scores": 1300,
+   "Actuals_project_scores": 1100
+ },
+ {
+   "Role": "SharePoint Engineer",
+   "Project_Scores": 1800,
+   "Actuals_project_scores": 1400
+ },
+
+ {
+   "Role": "Technology Analyst",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 1450
+ },
+ {
+   "Role": "SharePoint  Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 950
+ },
+ {
+   "Role": "Technology Analyst ",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 650
+ },
+ {
+   "Role": "SharePoint Development Architect",
+   "Project_Scores": 2300,
+   "Actuals_project_scores": 1835
+ },
+ {
+   "Role": "Digital Experience Engineer",
+   "Project_Scores": 1400,
+   "Actuals_project_scores": 1300
+ },
+ {
+   "Role": "Software Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 550
+ },
+ {
+   "Role": "Software/Mobile Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 850
+ },
+ {
+   "Role": "Mobile Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 650
+ },
+ {
+   "Role": "System Analyst and Excellence Enabler",
+   "Project_Scores": 1900,
+   "Actuals_project_scores": 1530
+ },
+ {
+   "Role": "EPM Consultant and Business Processes manager",
+   "Project_Scores": 900,
+   "Actuals_project_scores": 400
+ },
+ {
+   "Role": "Software Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 1250
+ },
+ {
+   "Role": "Digital Marketing Executive",
+   "Project_Scores": 450,
+   "Actuals_project_scores": 250
+ },
+ {
+   "Role": "Digital Marketing Associate",
+   "Project_Scores": 1300,
+   "Actuals_project_scores": 940
+ },
+ {
+   "Role": "EPM Developer",
+   "Project_Scores": 1550,
+   "Actuals_project_scores": 1250
+ },
+ {
+   "Role": "EPM Engineer",
+   "Project_Scores": 1800,
+   "Actuals_project_scores": 1500
+ },
+ {
+   "Role": "Business Analyst Associate",
+   "Project_Scores": 1250,
+   "Actuals_project_scores": 850
+ },
+ {
+   "Role": "Multimedia designer",
+   "Project_Scores": 1300,
+   "Actuals_project_scores": 550
+ },
+ {
+   "Role": "EPM Analyst & Excellence Enabler",
+   "Project_Scores": 1800,
+   "Actuals_project_scores": 1700
+ },
+ {
+   "Role": "Inside sales Associate ",
+   "Project_Scores": 0,
+   "Actuals_project_scores": 0
+ },
+ {
+   "Role": "Technology Architect and COE lead",
+   "Project_Scores": 1950,
+   "Actuals_project_scores": 1680
+ },
+ {
+   "Role": "Solutions Architect and COE lead",
+   "Project_Scores": 1950,
+   "Actuals_project_scores": 1590
+ },
+ {
+   "Role": "IT Associate",
+   "Project_Scores": 0,
+   "Actuals_project_scores": 0
+ }
+]
+
+var xScale = d3.scale.ordinal()
+        .domain(d3.range(dataset.length))
+        .rangeRoundBands([0, w], 0.10); 
+var yScale = d3.scale.linear()
+        .domain([0, d3.max(dataset, function(d) { return (d.Project_Scores > d.Actuals_project_scores) ? d.Project_Scores : d.Actuals_project_scores;})]) 
+        .range([h, 0]);
+var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .tickFormat(function(d) { return dataset[d].Role; })
+        .orient("bottom");
+var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(5);
+
+var commaFormat = d3.format(',');
+
+var svg = d3.select("#plot3")
+      .append("svg")
+      .attr("w", "100%")
+      .attr("data-h","0.80")
+      .attr("viewBox","0 0 "+(w + margin.left + margin.right)+" "+(h + margin.top + margin.bottom))
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var sets = svg.selectAll(".set") 
+  .data(dataset) 
+  .enter()
+  .append("g")
+    .attr("class","set")
+    .attr("transform",function(d,i){
+         return "translate(" + xScale(i) + ",0)";
+     }) ;
+
+sets.append("rect")
+    .attr("class","Project_Scores")
+  .attr("width", xScale.rangeBand()/2)
+  .attr("y", function(d) {
+    return yScale(d.Project_Scores);
+  })
+    .attr("x", xScale.rangeBand()/2)
+    .attr("height", function(d){
+        return h - yScale(d.Project_Scores);
+    })
+  .attr("fill", colors[0][1])
+  .on("mouseover", function(d,i) {
+    //Get this bar's x/y values, then augment for the tooltip
+    var xPosition = parseFloat(xScale(i) + xScale.rangeBand() );
+    var yPosition = h / 2;
+    //Update Tooltip Position & value
+    d3.select("#tooltip")
+      .style("left", xPosition + "px")
+      .style("top", yPosition + "px")
+      .select("#cpcVal")
+      .text(d.cpc);
+    d3.select("#tooltip")
+      .select("#volVal")
+      .text(commaFormat(d.Project_Scores));
+    d3.select("#tooltip")
+      .select("#Role")
+      .style("color", colors[1][1])
+      .text(d.Role);
+    d3.select("#tooltip").classed("hidden", false);
+  })
+  .on("mouseout", function() {
+    //Remove the tooltip
+    d3.select("#tooltip").classed("hidden", true);
+  })
+    ;
+
+sets.append("rect")
+    .attr("class","Actuals_project_scores")
+  .attr("width", xScale.rangeBand()/2)
+  .attr("y", function(d) {
+    return yScale(d.Actuals_project_scores);
+  })
+    .attr("height", function(d){
+        return h - yScale(d.Actuals_project_scores);
+    })
+  .attr("fill", colors[1][1])
+  .on("mouseover", function(d,i) {
+    //Get this bar's x/y values, then augment for the tooltip
+    var xPosition = parseFloat(xScale(i) + xScale.rangeBand() );
+    var yPosition = h / 2;
+    //Update Tooltip Position & value
+    d3.select("#tooltip")
+      .style("left", xPosition + "px")
+      .style("top", yPosition + "px")
+      .select("#cpcVal")
+      .text(d.cpc);
+    d3.select("#tooltip")
+      .select("#volVal")
+      .text(commaFormat(d.Actuals_project_scores));
+    d3.select("#tooltip")
+      .select("#Role")
+      .style("color", colors[1][1])
+      .text(d.Role);
+    d3.select("#tooltip").classed("hidden", false);
+  })
+  .on("mouseout", function() {
+    //Remove the tooltip
+    d3.select("#tooltip").classed("hidden", true);
+  })
+  ;
+  
+// Labels
+sets.append("text")
+  .attr("class", "Project_Scores")
+  .attr("width", xScale.rangeBand()/2)
+  .attr("y", function(d) {
+    return yScale(d.Project_Scores);
+    })
+    .attr("dy", 20)
+    .attr("dx", (xScale.rangeBand()/1.60) )
+//  .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif") 
+    .attr("font-size", "15px")
+    .attr("fill", " #FA8072")
+  .text(function(d) {
+    return commaFormat(d.Project_Scores);
+    });   
+  
+sets.append("text")
+  .attr("class", "Actuals_project_scores")
+  .attr("y", function(d) {
+    return yScale(d.Actuals_project_scores);
+    })
+    .attr("dy", 10)
+    .attr("dx",(xScale.rangeBand() / 4) - 10)
+//  .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif") 
+    .attr("font-size", "15px")
+    .attr("fill", "black")
+  .text(function(d) {
+    return commaFormat(d.Actuals_project_scores);
+    });
+
+// xAxis
+svg.append("g") // Add the X Axis
+  .attr("class", "x axis")
+ 
+  .attr("transform", "translate(0," + (h) + ")")
+  .call(xAxis)
+  .selectAll("text")
+    .attr("font-size","70px")
+    .style("text-anchor", "end")
+    .attr("dx", "-.2em")
+    .attr("dy", ".5em")
+    .attr("transform", function(d) {
+        return "rotate(-25)";
+    })
+    ;
+// yAxis
+svg.append("g")
+  .attr("class", "y axis")
+  .attr("transform", "translate(0 ,0)")
+  .call(yAxis)
+  ;
+
+// add legend   
+var legend = svg.append("g")
+    .attr("class", "legend")
+
+    .attr("transform", "translate(70,10)")
+    ;
+var legendRect = legend.selectAll('rect').data(colors);
+
+legendRect.enter()
+    .append("rect")
+    .attr("x", w - 350)
+//  .attr("y", 0)           
+    .attr("width", 30)
+    .attr("height", 30)
+    .attr("y", function(d, i) {
+        return i * 40;
+    })
+
+    .style("fill", function(d) {
+        return d[1];
+    });
+
+var legendText = legend.selectAll('text').data(colors);
+
+legendText.enter()
+    .append("text")
+    .attr("x", w - 300)
+    .style("font-size", "25px")
+    .attr("y", function(d, i) {
+        return i * 30 + 20;
+    })
+    .text(function(d) {
+        return d[0];
+    });
+
+function updateBars()
+{ 
+    svg.selectAll(".Project_Scores").remove();
+  svg.selectAll(".Actuals_project_scores").transition().duration(500).attr("width", xScale.rangeBand());
+}
+d3.select("#change").on("click", updateBars);
+
+
+//progress
+var createGradient=function(svg,id,color1,color2){
+ 
+  var defs = chart4.append("chart4:defs");
+  var margin = {top: 20, right: 10, bottom: 20, left: 20};
+  var red_gradient = defs.append("chart4:linearGradient")
+        .attr("id", id)
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "50%")
+        .attr("y2", "100%")
+        .attr("spreadMethod", "pad");
+ 
+  red_gradient.append("chart4:stop")
+        .attr("offset", "50%")
+        .attr("stop-color", color1)
+        .attr("stop-opacity", 1);
+ 
+  red_gradient.append("chart4:stop")
+        .attr("offset", "100%")
+        .attr("stop-color", color2)
+        .attr("stop-opacity", 1);
+};
+ 
+var percent = 72.94 //28775*100/39450 =72.94  
+var ratio=percent/100;
+ 
+var pie=d3.layout.pie()
+    .value(function(d){return d})
+    .sort(null);
+ 
+var w=600,h=520;
+ 
+var outerRadius=(w/2)-70;
+var innerRadius=180;
+ 
+var color = ['#FFA07A','#F08080','#20B2AA'];
+ 
+var chart4=d3.select("#plot4")
+    .append("svg")
+    .attr({
+        width:w,
+        height:h,
+        class:'shadow'
+    }).append('g')
+    .attr({
+        transform:'translate('+w/2+','+h/2+')'
+    });
+ 
+createGradient(chart4,'gradient',color[0],color[1]);
+ 
+var arc=d3.svg.arc()
+    .innerRadius(innerRadius)
+    .outerRadius(outerRadius)
+    .startAngle(0)
+    .endAngle(2*Math.PI);
+ 
+var arcLine=d3.svg.arc()
+    .innerRadius(innerRadius)
+    .outerRadius(outerRadius)
+    .startAngle(0);
+   
+ 
+ 
+var pathBackground=chart4.append('path')
+ 
+    .attr({
+        d:arc
+    })
+    .style({
+        fill:color[2]
+    });
+ 
+ 
+var pathChart=chart4.append('path')
+    .datum({endAngle:0})
+    .attr({
+        d:arcLine
+    })
+    .style({
+        fill:'url(#gradient)'
+    });
+ 
+var middleCount=chart4.append('text')
+    .text(function(d){
+        return d;
+    })
+ 
+    .attr({
+        class:'middleText',
+        'text-anchor':'middle',
+        dy:30,
+        dx:-15
+    })
+    .style({
+        fill:color[1],
+        'font-size':'90px'
+ 
+    });
+chart4.append('text')
+    .text('%')
+    .attr({
+        class:'percent',
+        'text-anchor':'middle',
+        dx:50,
+        dy:-5
+ 
+    })
+    .style({
+        fill:color[1],
+        'font-size':'40px'
+ 
+    });
+ 
+ 
+var arcTween=function(transition, newAngle) {
+    transition.attrTween("d", function (d) {
+        var interpolate = d3.interpolate(d.endAngle, newAngle);
+        var interpolateCount = d3.interpolate(0, percent);
+        return function (t) {
+            d.endAngle = interpolate(t);
+            middleCount.text(Math.floor(interpolateCount(t)));
+            return arcLine(d);
+        };
+    });
+};
+ 
+ 
+var animate=function(){
+    pathChart.transition()
+            .duration(750)
+            .ease('cubic')
+            .call(arcTween,((2*Math.PI))*ratio);
+ 
+ 
+};
+ 
+ 
+setTimeout(animate,0);
+
+</script> 
+
+    
+</html>

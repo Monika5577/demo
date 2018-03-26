@@ -1,0 +1,19 @@
+<html>
+   <body>
+
+      {% if saved %}
+         <strong>Your profile was saved.</strong>
+
+      <h2>{{ profile.name }}</h2>
+         <!--<img src="{{ profile.picture.url}}" >-->
+         <img src="{{ profile.picture.url }}" width="200" height="200" alt="{{ profile.picture.name }}">
+
+
+      {% endif %}
+
+      {% if not saved %}
+         <strong>Your profile was not saved.</strong>
+      {% endif %}
+
+   </body>
+</html>
